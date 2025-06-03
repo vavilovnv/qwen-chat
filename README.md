@@ -42,7 +42,7 @@ python main.py -h
 
 В планах:
 - Подключить UI
-- Подобрать оффлайн модель для хранения embeddings
+- Подобрать оффлайн модель для генерации embeddings
 - ...
 
 Simple chat with an offline llm model that supports OpenAPI. Supports chat in RAG mode.
