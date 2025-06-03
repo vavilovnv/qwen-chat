@@ -1,29 +1,33 @@
-from openai.types.chat import ChatCompletionMessageParam
+import argparse
 
-from src.open_api import close_client
-from src.llm_interaction import ask
+from settings import app_settings
+from src.llm_interaction import simple_chat, chat_with_rag
+from src.rag import input_url
 
 
 def main():
-    print("Hello!")
-    message_history: list[ChatCompletionMessageParam] = []
+    parser = argparse.ArgumentParser(
+        description=f"Chat with LLM {app_settings.LLM_NAME}"
+    )
+    parser.add_argument(
+        "-r",
+        "--rag",
+        action="store_true",
+        help="Use web-based RAG to generate responses",
+    )
+    parser.add_argument(
+        "-u", "--url", action="store_true", help="URL of the webpage to parse for RAG"
+    )
 
-    try:
-        while True:
-            print("Input your question:")
-            user_input = input("> ")
-            if user_input.lower() in ["exit", "quit", "q"]:
-                break
+    args = parser.parse_args()
 
-            print("Answer:")
-            answer, message_history = ask(
-                question=user_input, message_history=message_history
-            )
-            print(answer)
-    except KeyboardInterrupt:
-        close_client()
-    finally:
-        print("Bye!")
+    match (args.rag, args.url):
+        case (True, _):
+            chat_with_rag()
+        case (_, True):
+            input_url()
+        case _:
+            simple_chat()
 
 
 if __name__ == "__main__":

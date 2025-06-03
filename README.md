@@ -24,14 +24,25 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 3. На базе файла `.env_example` создать файл `.env` и заполнить значения переменных
-4. Запустить `main.py`
+4. Запустить `main.py` с нужным параметром, либо без него
 ```bash
+# чат с моделью на произвольную тему
 python main.py
+
+# загрузка web-ресурса по указанному url в базу векторов RAG
+python main.py -u 
+
+# чат с моделью в рамках RAG контента
+python main.py -r
+
+# помощь по доступным параметрам
+python main.py -h
+
 ```
 
 В планах:
 - Подключить UI
-- Добавить RAG на web-ресурс(ы)
+- Подобрать оффлайн модель для хранения embeddings
 - ...
 
-Simple chat with an offline llm model that supports OpenAPI.
+Simple chat with an offline llm model that supports OpenAPI. Supports chat in RAG mode.

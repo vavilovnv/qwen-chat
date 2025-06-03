@@ -1,60 +1,43 @@
 """Module for interacting with the LLM."""
 
-from openai.types.chat import (
-    ChatCompletionAssistantMessageParam,
-    ChatCompletionMessageParam,
-    ChatCompletionSystemMessageParam,
-    ChatCompletionUserMessageParam,
-)
+from typing import Callable
 
-from settings import app_settings
-from src import strings
-from src.open_api import client
+from openai.types.chat import ChatCompletionMessageParam
 
-SYSTEM_PROMPT = ChatCompletionSystemMessageParam(
-    role="system",
-    content=strings.DEFAULT_CONTENT,
-)
+from src.llm_client import llm
 
 
-def ask(
-    *, question: str, message_history: list[ChatCompletionMessageParam] | None = None
-) -> tuple[str, list[ChatCompletionMessageParam]]:
-    """Asks the model a question based on the message history."""
-    if message_history is None:
-        message_history = []
+def _chat(*, ask_method: Callable) -> None:
+    message_history: list[ChatCompletionMessageParam] = []
 
-    messages: list[ChatCompletionMessageParam] = [SYSTEM_PROMPT]
-    messages.extend(message_history)
-    messages.append(
-        ChatCompletionUserMessageParam(
-            role="user",
-            content=question,
-        )
-    )
+    print("Привет!\nВведите ваш вопрос или 'q, quit, exit' для выхода.")
 
-    response = client.chat.completions.create(
-        model=app_settings.LLM_NAME,
-        messages=messages,
-    )
+    try:
+        while True:
+            user_input = input("> ")  # TODO: convert to utf-8 input
+            if user_input.lower() in ["exit", "quit", "q"]:
+                break
 
-    if not response.choices:
-        return "", message_history
+            print("\nГенерация ответа, пожалуйста, подождите...")
+            answer, message_history = ask_method(
+                question=user_input, message_history=message_history
+            )
+            print(f"\n{answer}\n")
 
-    message = response.choices[0].message
-    message_content = message.content or ""
+    except KeyboardInterrupt:
+        print("\nПока!")
 
-    message_history.append(
-        ChatCompletionUserMessageParam(
-            role="user",
-            content=question,
-        )
-    )
-    message_history.append(
-        ChatCompletionAssistantMessageParam(
-            role="assistant",
-            content=message_content,
-        )
-    )
+    finally:
+        llm.close_client()
 
-    return message_content, message_history
+
+def simple_chat() -> None:
+    llm.get_client()
+
+    _chat(ask_method=llm.ask)
+
+
+def chat_with_rag() -> None:
+    llm.get_client()
+
+    _chat(ask_method=llm.ask_with_rag)
