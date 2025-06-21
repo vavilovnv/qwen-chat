@@ -28,8 +28,10 @@ class EmbeddingStore:
 
 
 def input_url() -> None:
-    app_settings.URL_FOR_RAG_CONTENT = input("Enter URL for RAG content: ")
-    update_rag_embeddings()
+    app_settings.URL_FOR_RAG_CONTENT = input(strings.INPUT_URL_TITLE)
+
+    url = app_settings.URL_FOR_RAG_CONTENT
+    update_rag_embeddings(url)
 
 
 def _get_chroma_db_collection_name(url: str) -> str:
@@ -63,14 +65,14 @@ def _get_available_classes() -> set[str]:
     return classes
 
 
-def update_rag_embeddings() -> None:
-    if not app_settings.URL_FOR_RAG_CONTENT:
+def update_rag_embeddings(url: str) -> None:
+    if not url:
         raise ValueError(strings.RAG_URL_EMPTY_ERROR)
 
     # classes = _get_available_classes()
     strainer = bs4.SoupStrainer(class_="md-content")  # TODO: add more classes here
     loader = WebBaseLoader(
-        web_paths=[app_settings.URL_FOR_RAG_CONTENT],
+        web_paths=[url],
         bs_kwargs={"parse_only": strainer},
     )
 
@@ -86,4 +88,13 @@ def update_rag_embeddings() -> None:
     vector_store = EmbeddingStore().init_store()
 
     ids = vector_store.add_documents(splits)
-    print(f"Загружено {len(ids)} страниц в Chroma DB")
+    print(strings.PAGES_WERE_LOADED.format(pages_amount=len(ids)))
+
+
+def add_url_to_vectordb(url) -> tuple[bool, str]:
+    try:
+        update_rag_embeddings(url)
+    except Exception as e:
+        return False, str(e)
+
+    return True, strings.URL_SUCCESSFULLY_ADDED

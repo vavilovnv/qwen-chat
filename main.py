@@ -18,8 +18,13 @@ def main():
     parser.add_argument(
         "-u", "--url", action="store_true", help="URL of the webpage to parse for RAG"
     )
+    parser.add_argument("-w", "--web", action="store_true", help="Launch web interface")
 
     args = parser.parse_args()
+
+    if args.web:
+        print("Run 'streamlit run web_app.py' in your terminal")
+        return
 
     match (args.rag, args.url):
         case (True, _):
