@@ -10,6 +10,8 @@ class Settings:
     API_KEY: str = os.getenv("API_KEY", "")
     LLM_NAME: str = os.getenv("LLM_NAME", "")
 
+    CHAT_HISTORY_LENGTH: int = int(os.getenv("CHAT_HISTORY_LENGTH", 10))
+
     URL_FOR_RAG_CONTENT: str = os.getenv("URL_FOR_RAG_CONTENT", "")
 
     EMBEDDING_MODEL: str = "intfloat/multilingual-e5-small"  # TODO: check other models

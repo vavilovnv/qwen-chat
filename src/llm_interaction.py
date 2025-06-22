@@ -8,6 +8,7 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 
+from settings import app_settings
 from src.llm_client import llm
 
 
@@ -37,8 +38,13 @@ def _chat(*, ask_method: Callable) -> None:
 
 def _ask(*, question: str, history: list[dict], ask_method: Callable) -> str:
     message_history: list[ChatCompletionMessageParam] = []
-    history = history[:-1]
+
     if len(history):
+        if len(history) > app_settings.CHAT_HISTORY_LENGTH:
+            history = history[: app_settings.CHAT_HISTORY_LENGTH - 1]
+        else:
+            history = history[:-1]
+
         for message in history:
             if message["role"] == "user":
                 message_history.append(

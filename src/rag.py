@@ -4,6 +4,7 @@ import hashlib
 
 import bs4
 import requests
+from chromadb import GetResult
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -37,7 +38,7 @@ def input_url() -> None:
 def _get_chroma_db_collection_name(url: str) -> str:
     url_hash = hashlib.md5(url.encode("utf-8")).hexdigest()
 
-    return strings.CHROMA_DB_COLLECTION_NAME.format(url_hash=url_hash[:15])
+    return strings.VDB_COLLECTION_NAME.format(url_hash=url_hash[:15])
 
 
 def _get_available_classes() -> set[str]:
@@ -91,10 +92,34 @@ def update_rag_embeddings(url: str) -> None:
     print(strings.PAGES_WERE_LOADED.format(pages_amount=len(ids)))
 
 
-def add_url_to_vectordb(url) -> tuple[bool, str]:
+def add_url_to_vectordb(url: str) -> tuple[bool, str]:
     try:
         update_rag_embeddings(url)
     except Exception as e:
         return False, str(e)
 
     return True, strings.URL_SUCCESSFULLY_ADDED
+
+
+def get_chroma_content() -> list[dict]:
+    vector_store = EmbeddingStore().init_store()
+    try:
+        collection = vector_store._collection  # noqa
+    except Exception as e:
+        return [{"error": strings.VDB_GETTING_DATA_ERROR.format(error=str(e))}]
+
+    documents: GetResult = collection.get()
+
+    content_list = []
+    if documents and "documents" in documents:
+        base_data = zip(documents["documents"], documents["metadatas"])  # type: ignore
+        for obj_id, (doc, metadata) in enumerate(base_data):
+            content_list.append(
+                {
+                    "id": obj_id,
+                    "content": doc[:300] + "..." if len(doc) > 300 else doc,
+                    "metadata": metadata,
+                }
+            )
+
+    return content_list

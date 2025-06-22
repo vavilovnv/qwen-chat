@@ -1,51 +1,62 @@
-### Простой чат с оффлайн llm моделью, которая поддерживает OpenAPI
+### 🤖 Chat with an offline LLM that supports OpenAPI
 
-Оффлайн модель можно взять на [huggingface](https://huggingface.co/), их там тысячи. Собирать модель лучше в отдельной от проекта директории.
+`Ru` Чат с офлайн-моделью llm, которая поддерживает OpenAPI и может работать в RAG-режиме. Чатиться можно в терминале и веб-клиенте. Помимо наполнения векторной базы доступен просмотр её содержимого.
 
-Стянуть llm с huggingface можно вручную, а можно при помощи huggingface-cli. Это удобнее, если модель большая и архив разбит на файлы. Обычно команда для загрузки есть на странице нужной модели:
+The app allows you to:
+- Chat with an offline LLM model using its knowledge base
+- Work with the model in [RAG mode](https://aws.amazon.com/ru/what-is/retrieval-augmented-generation/)
+- Fill the vector database [Chroma](https://www.trychroma.com/) данными из выбранных URL-ресурсов 
+- Browse vector database content
+
+The offline LLM can be taken at [huggingface](https://huggingface.co/), there are hundreds of them. It is better to collect the model in a directory separate from the project.
+
+You can download LLM from huggingface manually or using huggingface-cli. This is more convenient if the model is large and the archive is split into files. Usually, the download command is available on the page of the desired model:
 ```bash
 huggingface-cli download ...
 ```
 
-Далее собираем модель и поднимаем сервер при помощи [llama.cpp](https://github.com/ggml-org/llama.cpp):
+Next, we assemble the model and start the server using [llama.cpp](https://github.com/ggml-org/llama.cpp):
 
 ```bash
 ./llama-server -m ./llm_file --port 8080
 ```
 
-Установка и запуск чата с моделью:
+### Setting up and starting a chat with a model:
 
-1. Установить менеджер пакетов [uv](https://pypi.org/project/uv/):
+1. Install a package manager [uv](https://pypi.org/project/uv/):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
-2. Установить зависимости:
+2. Install dependencies:
 ```bash
 uv sync
 ```
-3. На базе файла `.env_example` создать файл `.env` и заполнить значения переменных
-4. Запустить `main.py` с нужным параметром, либо без него
+3. Based on the `.env_example` file, create a `.env` file and fill in the variable values.
+4. Run `main.py` with or without the required parameter.
 ```bash
-# чат с моделью на произвольную тему
+# chat with a model on any topic
 python main.py
 
-# загрузка web-ресурса по указанному url в базу векторов RAG
+# loading a web resource from the specified URL into the RAG database
 python main.py -u 
 
-# чат с моделью в рамках RAG контента
+# chat with a model in RAG mode
 python main.py -r
 
-# помощь по доступным параметрам
+# view available settings
 python main.py -h
 ```
 
-Также с моделью можно общаться через web-клиент:
+### Using the web client
+You can also communicate with the model via a web client:
 ```bash
 streamlit run web_app.py
 ```
+After launching the web client, you can chat with the model, add URL resources to the vector database, and view its contents—the number of chunks and their content:
+![Working with LLM in a web client](./static/images/web-app.png)
 
-В планах:
-- Подобрать оффлайн модель для генерации embeddings
+Plans:
+- Select an offline LLM for generating attachments.
+- Visualize storage data in a vector database.
+- CRUD for vector database.
 - ...
-
-Simple chat with an offline llm model that supports OpenAPI. Supports chat in RAG mode.
